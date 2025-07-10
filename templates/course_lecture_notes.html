@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Lecture Notes: {{ course.fullname }} - Moodle API Client{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('course_detail', course_id=course.id) }}">{{ course.fullname }}</a></li>
+        <li class="breadcrumb-item active">Lecture Notes</li>
+    </ol>
+</nav>
+
+<h1 class="mb-4">Lecture Notes for {{ course.fullname }}</h1>
+
+{% if lecture_notes %}
+    <div class="accordion" id="lectureNotesAccordion">
+        {% for section in lecture_notes %}
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="heading{{ loop.index }}">
+                    <button class="accordion-button {% if not loop.first %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.index }}">
+                        {{ section.name }}
+                    </button>
+                </h2>
+                <div id="collapse{{ loop.index }}" class="accordion-collapse collapse {% if loop.first %}show{% endif %}" data-bs-parent="#lectureNotesAccordion">
+                    <div class="accordion-body">
+                        <div class="list-group">
+                            {% for module in section.modules %}
+                                <div class="list-group-item lecture-note">
+                                    <h5>{{ module.name }}</h5>
+                                    <p><small class="text-muted">Type: {{ module.modname }}</small></p>
+                                    
+                                    {% if 'contents' in module %}
+                                        <ul class="list-unstyled">
+                                            {% for content in module.contents %}
+                                                <li class="mb-2">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <div>
+                                                            <i class="bi bi-file-earmark"></i>
+                                                            {{ content.filename }}
+                                                            <small class="text-muted">({{ (content.filesize / 1024)|round(1) }} KB)</small>
+                                                        </div>
+                                                        <div>
+                                                            {% if 'fileurl' in content %}
+                                                                <a href="{{ url_for('download_file', course_id=course.id, file_url=content.fileurl|replace('?', '___')|replace('&', '__')) }}" 
+                                                                   class="btn btn-sm btn-outline-primary me-1">
+                                                                    Download
+                                                                </a>
+                                                                
+                                                                {% if content.filename.lower().endswith('.pdf') %}
+                                                                    <a href="{{ url_for('summarize_pdf', course_id=course.id, file_url=content.fileurl|replace('?', '___')|replace('&', '__'), filename=content.filename) }}" 
+                                                                       class="btn btn-sm btn-outline-success">
+                                                                        Summarize
+                                                                    </a>
+                                                                {% endif %}
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% elif module.modname == 'url' and 'url' in module %}
+                                        <a href="{{ module.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                            Open URL
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="alert alert-info">No lecture notes found for this course.</div>
+{% endif %}
+{% endblock %}

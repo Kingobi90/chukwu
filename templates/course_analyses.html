@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Grade Analyses{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('course_detail', course_id=course.id) }}">{{ course.shortname }}</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('course_grades', course_id=course.id) }}">Grades</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Analyses</li>
+        </ol>
+    </nav>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Grade Analyses for {{ course.fullname }}</h5>
+            <a href="{{ url_for('analyze_grades', course_id=course.id) }}" class="btn btn-sm btn-primary">
+                <i class="bi bi-graph-up"></i> Generate New Analysis
+            </a>
+        </div>
+        <div class="card-body">
+            {% if analyses %}
+                <div class="list-group">
+                    {% for analysis in analyses %}
+                        <div class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">Analysis from {{ analysis.created_at }}</h6>
+                                <div>
+                                    <a href="{{ url_for('view_analysis', analysis_id=analysis.id) }}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye"></i> View
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" 
+                                            data-bs-toggle="modal" data-bs-target="#deleteModal{{ analysis.id }}">
+                                        <i class="bi bi-trash"></i> Delete
+                                    </button>
+                                </div>
+                            </div>
+                            <p class="mb-1 text-muted">{{ analysis.analysis|truncate(100) }}</p>
+                        </div>
+                        
+                        <!-- Delete Confirmation Modal -->
+                        <div class="modal fade" id="deleteModal{{ analysis.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ analysis.id }}" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="deleteModalLabel{{ analysis.id }}">Confirm Deletion</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        Are you sure you want to delete this grade analysis from {{ analysis.created_at }}?
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                        <form action="{{ url_for('delete_analysis', analysis_id=analysis.id) }}" method="post">
+                                            <button type="submit" class="btn btn-danger">Delete</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    No grade analyses found for this course. Click "Generate New Analysis" to create one.
+                </div>
+            {% endif %}
+        </div>
+        <div class="card-footer text-center">
+            <a href="{{ url_for('course_grades', course_id=course.id) }}" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left"></i> Back to Grades
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

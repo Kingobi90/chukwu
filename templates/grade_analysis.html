@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Grade Analysis{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('course_detail', course_id=course.id) }}">{{ course.shortname }}</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('course_grades', course_id=course.id) }}">Grades</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Analysis</li>
+        </ol>
+    </nav>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Grade Analysis for {{ course.fullname }}</h5>
+            <small class="text-muted">Generated on {{ analysis.created_at }}</small>
+        </div>
+        <div class="card-body">
+            <div class="analysis-content">
+                {{ analysis.analysis|nl2br|safe }}
+            </div>
+        </div>
+        <div class="card-footer text-center">
+            <a href="{{ url_for('course_grades', course_id=course.id) }}" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left"></i> Back to Grades
+            </a>
+            <a href="{{ url_for('course_analyses', course_id=course.id) }}" class="btn btn-outline-secondary">
+                <i class="bi bi-list"></i> View All Analyses
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Grades: {{ course.fullname }} - Moodle API Client{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('course_detail', course_id=course.id) }}">{{ course.fullname }}</a></li>
+        <li class="breadcrumb-item active">Grades</li>
+    </ol>
+</nav>
+
+<h1 class="mb-4">Grades for {{ course.fullname }}</h1>
+
+{% if grades and 'usergrades' in grades and grades.usergrades %}
+    {% set user_grades = grades.usergrades[0] %}
+    
+    {% if 'grade' in user_grades %}
+        <div class="alert alert-info">
+            <h4>Overall Course Grade: {{ user_grades.grade }}</h4>
+        </div>
+    {% endif %}
+    
+    {% if 'gradeitems' in user_grades and user_grades.gradeitems %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Assessment</th>
+                        <th>Grade</th>
+                        <th>Weight</th>
+                        <th>Feedback</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in user_grades.gradeitems %}
+                        {% if item.itemname and item.itemname|lower != 'course total' %}
+                            <tr>
+                                <td>{{ item.itemname }}</td>
+                                <td>{{ item.gradeformatted|default('-') }}</td>
+                                <td>{{ item.weightformatted|default('-') }}</td>
+                                <td>{{ item.feedback|default('-') }}</td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-warning">No grade items found for this course.</div>
+    {% endif %}
+    
+    {% if 'warnings' in grades and grades.warnings %}
+        <div class="alert alert-warning">
+            <h5>Warnings:</h5>
+            <ul>
+                {% for warning in grades.warnings %}
+                    <li>{{ warning.message }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+{% else %}
+    <div class="alert alert-warning">
+        No grades available for this course. This could be because:
+        <ul>
+            <li>There are no graded items yet</li>
+            <li>The Moodle API doesn't have permission to access grades</li>
+            <li>There was an error retrieving the grades</li>
+        </ul>
+    </div>
+{% endif %}
+{% endblock %}

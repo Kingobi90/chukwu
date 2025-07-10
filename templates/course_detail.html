@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}{{ course.fullname }} - Moodle API Client{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+        <li class="breadcrumb-item active">{{ course.fullname }}</li>
+    </ol>
+</nav>
+
+<h1 class="mb-4">{{ course.fullname }}</h1>
+<p><small class="text-muted">{{ course.shortname }}</small></p>
+
+<div class="row mt-4">
+    <div class="col-md-4 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Grades</h5>
+                <p class="card-text">View your grades for this course.</p>
+                <a href="{{ url_for('course_grades', course_id=course.id) }}" class="btn btn-primary">View Grades</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Lecture Notes</h5>
+                <p class="card-text">Access lecture notes and materials.</p>
+                <a href="{{ url_for('course_lecture_notes', course_id=course.id) }}" class="btn btn-primary">View Lecture Notes</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Grade Analyses</h5>
+                <p class="card-text">AI-powered insights about your academic performance.</p>
+                <a href="{{ url_for('course_analyses', course_id=course.id) }}" class="btn btn-primary">View Analyses</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

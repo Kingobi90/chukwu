@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Moodle API Client{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Login with Moodle API Token</h4>
+            </div>
+            <div class="card-body">
+                {% if error %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                {% endif %}
+                
+                <form method="POST" action="{{ url_for('login') }}">
+                    {{ form.hidden_tag() }}
+                    <div class="mb-3">
+                        {{ form.token.label(class="form-label") }}
+                        {{ form.token(class="form-control") }}
+                        <div class="form-text">
+                            You can obtain your token from Moodle. See the 
+                            <a href="https://github.com/yourusername/moodle-api-client/blob/main/docs/obtaining_api_token.md" target="_blank">documentation</a>.
+                        </div>
+                    </div>
+                    <div class="d-grid">
+                        {{ form.submit(class="btn btn-primary") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
