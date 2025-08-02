@@ -1055,7 +1055,7 @@ if __name__ == '__main__':
     create_templates()
     
     # Run the app
-    app.run(debug=True)
+    app.run(debug=True, port=5001)
     """Create HTML templates for the web app"""
     templates_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
     

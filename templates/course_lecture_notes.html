@@ -40,21 +40,12 @@
                                                             {{ content.filename }}
                                                             <small class="text-muted">({{ (content.filesize / 1024)|round(1) }} KB)</small>
                                                         </div>
-                                                        <div>
-                                                            {% if 'fileurl' in content %}
-                                                                <a href="{{ url_for('download_file', course_id=course.id, file_url=content.fileurl|replace('?', '___')|replace('&', '__')) }}" 
-                                                                   class="btn btn-sm btn-outline-primary me-1">
-                                                                    Download
-                                                                </a>
-                                                                
-                                                                {% if content.filename.lower().endswith('.pdf') %}
-                                                                    <a href="{{ url_for('summarize_pdf', course_id=course.id, file_url=content.fileurl|replace('?', '___')|replace('&', '__'), filename=content.filename) }}" 
-                                                                       class="btn btn-sm btn-outline-success">
-                                                                        Summarize
-                                                                    </a>
-                                                                {% endif %}
-                                                            {% endif %}
-                                                        </div>
+                                                        {% if 'fileurl' in content %}
+                                                            <a href="{{ url_for('download_file', course_id=course.id, file_url=content.fileurl|replace('?', '___')|replace('&', '__')) }}" 
+                                                               class="btn btn-sm btn-outline-primary">
+                                                                Download
+                                                            </a>
+                                                        {% endif %}
                                                     </div>
                                                 </li>
                                             {% endfor %}
