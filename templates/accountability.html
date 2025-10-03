@@ -1,0 +1,346 @@
+{% extends "base.html" %}
+
+{% block title %}Accountability Circle - StudyMaster{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        background: linear-gradient(135deg, #2c0735 0%, #7f0a1e 100%);
+    }
+    .account-container {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+    .feature-box {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(231, 76, 60, 0.3);
+        border-radius: 16px;
+        padding: 30px;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+    }
+    .feature-box:hover {
+        background: rgba(255, 255, 255, 0.08);
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(231, 76, 60, 0.3);
+    }
+    .buddy-card {
+        background: rgba(231, 76, 60, 0.1);
+        border: 2px solid rgba(231, 76, 60, 0.3);
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 15px;
+        transition: all 0.3s ease;
+    }
+    .buddy-card:hover {
+        background: rgba(231, 76, 60, 0.2);
+        border-color: #e74c3c;
+    }
+    .avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #e74c3c, #c0392b);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        font-weight: bold;
+    }
+    .progress-bar-custom {
+        height: 10px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 5px;
+        overflow: hidden;
+    }
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #e74c3c, #ff6b6b);
+        border-radius: 5px;
+        transition: width 0.3s ease;
+    }
+    .leaderboard-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 8px;
+        margin-bottom: 10px;
+        border-left: 3px solid #e74c3c;
+    }
+    .rank-badge {
+        background: linear-gradient(135deg, #e74c3c, #c0392b);
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+    }
+    .back-home {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        background: rgba(0, 0, 0, 0.6);
+        color: #e74c3c;
+        padding: 10px 20px;
+        border-radius: 8px;
+        text-decoration: none;
+        border: 1px solid rgba(231, 76, 60, 0.3);
+        transition: all 0.3s ease;
+        z-index: 1000;
+    }
+    .back-home:hover {
+        background: rgba(231, 76, 60, 0.2);
+        transform: translateX(-5px);
+    }
+    .neon-button {
+        background: linear-gradient(45deg, #e74c3c, #ff6b6b);
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        color: #fff;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    .neon-button:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 20px #e74c3c;
+    }
+    .challenge-badge {
+        display: inline-block;
+        padding: 5px 12px;
+        background: rgba(231, 76, 60, 0.2);
+        border: 1px solid #e74c3c;
+        border-radius: 12px;
+        font-size: 12px;
+        margin: 5px;
+    }
+</style>
+
+<a href="{{ url_for('index') }}" class="back-home">← Back to Hub</a>
+
+<div class="account-container">
+    <div class="text-center mb-5">
+        <h1 class="display-4" style="color: #e74c3c;">⚡ Accountability Circle</h1>
+        <p class="lead text-white-50">Compete, Collaborate, Crush Your Goals</p>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="feature-box">
+                <h3 style="color: #e74c3c;">🏆 Weekly Leaderboard</h3>
+                <p class="text-white-50 mb-4">Top performers this week</p>
+
+                <div class="leaderboard-item" style="background: rgba(255, 215, 0, 0.1); border-left-color: gold;">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rank-badge" style="background: gold; color: #000;">1</div>
+                        <div class="avatar">🥇</div>
+                        <div>
+                            <strong style="color: gold;">Sarah K.</strong><br>
+                            <small class="text-white-50">42 hours • 156 flashcards • 8 sessions</small>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <h4 style="color: gold;">2,450</h4>
+                        <small class="text-white-50">points</small>
+                    </div>
+                </div>
+
+                <div class="leaderboard-item" style="background: rgba(192, 192, 192, 0.1); border-left-color: silver;">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rank-badge" style="background: silver; color: #000;">2</div>
+                        <div class="avatar">🥈</div>
+                        <div>
+                            <strong>You</strong><br>
+                            <small class="text-white-50">38 hours • 142 flashcards • 12 sessions</small>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <h4 style="color: silver;">2,280</h4>
+                        <small class="text-white-50">points</small>
+                    </div>
+                </div>
+
+                <div class="leaderboard-item" style="background: rgba(205, 127, 50, 0.1); border-left-color: #cd7f32;">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rank-badge" style="background: #cd7f32;">3</div>
+                        <div class="avatar">🥉</div>
+                        <div>
+                            <strong>Alex M.</strong><br>
+                            <small class="text-white-50">35 hours • 128 flashcards • 10 sessions</small>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <h4 style="color: #cd7f32;">2,140</h4>
+                        <small class="text-white-50">points</small>
+                    </div>
+                </div>
+
+                <div class="leaderboard-item">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rank-badge">4</div>
+                        <div class="avatar">JL</div>
+                        <div>
+                            <strong>James L.</strong><br>
+                            <small class="text-white-50">32 hours • 115 flashcards • 9 sessions</small>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <h4>1,980</h4>
+                        <small class="text-white-50">points</small>
+                    </div>
+                </div>
+
+                <div class="leaderboard-item">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rank-badge">5</div>
+                        <div class="avatar">MK</div>
+                        <div>
+                            <strong>Maya K.</strong><br>
+                            <small class="text-white-50">28 hours • 98 flashcards • 7 sessions</small>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <h4>1,750</h4>
+                        <small class="text-white-50">points</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="feature-box">
+                <h3 style="color: #e74c3c;">🎯 Active Challenges</h3>
+                <p class="text-white-50 mb-4">Compete in weekly challenges</p>
+
+                <div class="buddy-card">
+                    <h5>7-Day Study Streak Challenge</h5>
+                    <p class="text-white-50">Study for at least 2 hours every day for 7 days straight</p>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Progress: 4/7 days</span>
+                        <span class="text-success">57%</span>
+                    </div>
+                    <div class="progress-bar-custom">
+                        <div class="progress-fill" style="width: 57%"></div>
+                    </div>
+                    <p class="mt-2 mb-0"><small class="text-white-50">12 participants • 3 completed</small></p>
+                </div>
+
+                <div class="buddy-card">
+                    <h5>100 Flashcards Master</h5>
+                    <p class="text-white-50">Review 100 flashcards this week</p>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Progress: 78/100 cards</span>
+                        <span class="text-warning">78%</span>
+                    </div>
+                    <div class="progress-bar-custom">
+                        <div class="progress-fill" style="width: 78%"></div>
+                    </div>
+                    <p class="mt-2 mb-0"><small class="text-white-50">8 participants • 1 completed</small></p>
+                </div>
+
+                <button class="btn neon-button w-100 mt-3">Browse More Challenges</button>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="feature-box">
+                <h3 style="color: #e74c3c;">👥 Your Study Buddies</h3>
+                <p class="text-white-50 mb-4">5 accountability partners</p>
+
+                <div class="buddy-card">
+                    <div class="d-flex align-items-center gap-3 mb-2">
+                        <div class="avatar">SK</div>
+                        <div>
+                            <strong>Sarah K.</strong><br>
+                            <small class="text-white-50">🔥 7 day streak</small>
+                        </div>
+                    </div>
+                    <p class="mb-2" style="font-size: 14px;">Just completed 2-hour study session! 💪</p>
+                    <small class="text-white-50">2 minutes ago</small>
+                </div>
+
+                <div class="buddy-card">
+                    <div class="d-flex align-items-center gap-3 mb-2">
+                        <div class="avatar">AM</div>
+                        <div>
+                            <strong>Alex M.</strong><br>
+                            <small class="text-white-50">🔥 5 day streak</small>
+                        </div>
+                    </div>
+                    <p class="mb-2" style="font-size: 14px;">Finished 50 flashcards - on fire! 🔥</p>
+                    <small class="text-white-50">1 hour ago</small>
+                </div>
+
+                <div class="buddy-card">
+                    <div class="d-flex align-items-center gap-3 mb-2">
+                        <div class="avatar">JL</div>
+                        <div>
+                            <strong>James L.</strong><br>
+                            <small class="text-white-50">🔥 12 day streak</small>
+                        </div>
+                    </div>
+                    <p class="mb-2" style="font-size: 14px;">Pomodoro session completed ✅</p>
+                    <small class="text-white-50">3 hours ago</small>
+                </div>
+
+                <button class="btn neon-button w-100">Add New Buddy</button>
+            </div>
+
+            <div class="feature-box">
+                <h3 style="color: #e74c3c;">🏅 Your Achievements</h3>
+
+                <div class="challenge-badge">🔥 7-Day Streak</div>
+                <div class="challenge-badge">📚 100 Hours Club</div>
+                <div class="challenge-badge">⚡ Speed Learner</div>
+                <div class="challenge-badge">🎯 Perfect Week</div>
+                <div class="challenge-badge">🧠 Flashcard Master</div>
+                <div class="challenge-badge">👥 Team Player</div>
+
+                <hr style="border-color: rgba(255,255,255,0.2); margin: 20px 0;">
+
+                <h5 style="color: #e74c3c;">Next Milestone</h5>
+                <p class="text-white-50">Study for 200 total hours</p>
+                <div class="progress-bar-custom mb-2">
+                    <div class="progress-fill" style="width: 78%"></div>
+                </div>
+                <small class="text-white-50">156/200 hours</small>
+            </div>
+
+            <div class="feature-box">
+                <h3 style="color: #e74c3c;">📊 This Week</h3>
+
+                <div class="d-flex justify-content-between mb-3">
+                    <span>Study Time</span>
+                    <strong style="color: #e74c3c;">38h 15m</strong>
+                </div>
+
+                <div class="d-flex justify-content-between mb-3">
+                    <span>Flashcards</span>
+                    <strong style="color: #e74c3c;">142 cards</strong>
+                </div>
+
+                <div class="d-flex justify-content-between mb-3">
+                    <span>Sessions</span>
+                    <strong style="color: #e74c3c;">12 sessions</strong>
+                </div>
+
+                <div class="d-flex justify-content-between mb-3">
+                    <span>Rank</span>
+                    <strong style="color: #e74c3c;">#2 of 24</strong>
+                </div>
+
+                <hr style="border-color: rgba(255,255,255,0.2);">
+
+                <div class="text-center">
+                    <p class="text-white-50 mb-2">You're 170 points behind #1</p>
+                    <button class="btn neon-button">Push Harder! 💪</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

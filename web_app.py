@@ -49,10 +49,13 @@ class LoginForm(FlaskForm):
 
 @app.route('/')
 def index():
-    """Home page"""
-    if 'username' in session:
-        return redirect(url_for('dashboard'))
-    return render_template('index.html')
+    """Home page - AI Coach Hub"""
+    return render_template('home.html')
+
+@app.route('/home')
+def home():
+    """Alias for home page"""
+    return render_template('home.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -109,7 +112,94 @@ def dashboard():
         flash(f"Error retrieving courses: {str(e)}", 'danger')
         courses = []
     
-    return render_template('dashboard.html', username=session['username'], courses=courses)
+    return render_template('dashboard_new.html', username=session['username'], courses=courses)
+
+# ========== NEW FEATURE ROUTES ==========
+
+@app.route('/campus-underground')
+def campus_underground():
+    """Campus Underground - Student Community Hub"""
+    if 'username' not in session:
+        flash('Please login first.', 'warning')
+        return redirect(url_for('login'))
+    return render_template('campus_underground_new.html', username=session['username'])
+
+@app.route('/smart-study')
+def smart_study():
+    """Smart Study - AI-Powered Learning"""
+    if 'username' not in session:
+        flash('Please login first.', 'warning')
+        return redirect(url_for('login'))
+
+    # Get client and courses for material selection
+    client = get_client()
+    if not client:
+        return redirect(url_for('login'))
+
+    try:
+        courses = client.get_courses()
+    except Exception as e:
+        flash(f"Error retrieving courses: {str(e)}", 'danger')
+        courses = []
+
+    return render_template('smart_study_new.html', username=session['username'], courses=courses)
+
+@app.route('/live-sync')
+def live_sync():
+    """Live Class Sync - Real-time Moodle Integration"""
+    if 'username' not in session:
+        flash('Please login first.', 'warning')
+        return redirect(url_for('login'))
+
+    # Get client and courses
+    client = get_client()
+    if not client:
+        return redirect(url_for('login'))
+
+    try:
+        courses = client.get_courses()
+        # Get all course contents
+        all_contents = []
+        for course in courses:
+            try:
+                contents = client.get_course_contents(course['id'])
+                all_contents.append({
+                    'course': course,
+                    'contents': contents
+                })
+            except:
+                pass
+    except Exception as e:
+        flash(f"Error syncing with Moodle: {str(e)}", 'danger')
+        all_contents = []
+
+    return render_template('live_sync.html', username=session['username'], all_contents=all_contents)
+
+@app.route('/focus-mode')
+def focus_mode():
+    """Focus Mode - Distraction-Free Studying"""
+    if 'username' not in session:
+        flash('Please login first.', 'warning')
+        return redirect(url_for('login'))
+    return render_template('focus_mode.html', username=session['username'])
+
+@app.route('/accountability')
+def accountability():
+    """Accountability Circle - Study Groups & Progress Tracking"""
+    if 'username' not in session:
+        flash('Please login first.', 'warning')
+        return redirect(url_for('login'))
+    return render_template('accountability.html', username=session['username'])
+
+@app.route('/brain-dump')
+def brain_dump():
+    """Brain Dump - Quick Notes & Ideas"""
+    if 'username' not in session:
+        flash('Please login first.', 'warning')
+        return redirect(url_for('login'))
+    return render_template('brain_dump.html', username=session['username'])
+
+# ========== END NEW FEATURE ROUTES ==========
 
 @app.route('/course/<int:course_id>')
 def course_detail(course_id):
@@ -455,37 +545,22 @@ def get_client():
 
 def is_likely_lecture_note(module):
     """
-    Check if a module is likely to be a lecture note
-    
+    Check if a module is likely to be a lecture note or course material
+
     Args:
         module: Module dict from Moodle API
-        
+
     Returns:
-        True if the module is likely a lecture note, False otherwise
+        True if the module is course content (files, folders, URLs), False otherwise
     """
     # Check module type
     module_type = module.get('modname', '').lower()
-    
-    # Check module name
-    name = module.get('name', '').lower()
-    
-    # Keywords that might indicate lecture notes
-    lecture_keywords = ['lecture', 'notes', 'slides', 'presentation', 'chapter', 'week', 'topic', 'class']
-    
-    # Check if it's a resource (file) or a URL
-    if module_type in ['resource', 'url']:
-        # Check if the name contains lecture keywords
-        for keyword in lecture_keywords:
-            if keyword in name:
-                return True
-    
-    # If it's a folder, check if it might contain lecture notes
-    if module_type == 'folder':
-        for keyword in lecture_keywords:
-            if keyword in name:
-                return True
-    
-    return False
+
+    # Include all resources, folders, URLs, pages, and books
+    # Exclude assignments, quizzes, forums, etc.
+    content_types = ['resource', 'url', 'folder', 'page', 'book', 'label']
+
+    return module_type in content_types
 
 def create_templates():
     """Create HTML templates for the web app"""
@@ -1050,362 +1125,9 @@ if __name__ == '__main__':
     # Create templates directory if it doesn't exist
     templates_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
     os.makedirs(templates_dir, exist_ok=True)
-    
+
     # Create template files if they don't exist
     create_templates()
-    
+
     # Run the app
     app.run(debug=True, port=5001)
-    """Create HTML templates for the web app"""
-    templates_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
-    
-    # Base template
-    base_html = '''<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Moodle API Client{% endblock %}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body { padding-top: 60px; }
-        .course-card { height: 100%; }
-        .lecture-note { margin-bottom: 10px; }
-    </style>
-</head>
-<body>
-    <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-        <div class="container">
-            <a class="navbar-brand" href="{{ url_for('index') }}">Moodle API Client</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    {% if 'username' in session %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
-                        </li>
-                    {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('login') }}">Login</a>
-                        </li>
-                    {% endif %}
-                </ul>
-            </div>
-        </div>
-    </nav>
-
-    <div class="container mt-4">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-        
-        {% block content %}{% endblock %}
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>'''
-    
-    # Index template
-    index_html = '''{% extends "base.html" %}
-
-{% block title %}Moodle API Client - Home{% endblock %}
-
-{% block content %}
-<div class="px-4 py-5 my-5 text-center">
-    <h1 class="display-5 fw-bold">Moodle API Client</h1>
-    <div class="col-lg-6 mx-auto">
-        <p class="lead mb-4">
-            Access your Concordia University Moodle courses, grades, and lecture materials.
-        </p>
-        <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-            <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg px-4 gap-3">Login with API Token</a>
-        </div>
-    </div>
-</div>
-{% endblock %}'''
-    
-    # Login template
-    login_html = '''{% extends "base.html" %}
-
-{% block title %}Login - Moodle API Client{% endblock %}
-
-{% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h4 class="mb-0">Login with Moodle API Token</h4>
-            </div>
-            <div class="card-body">
-                {% if error %}
-                    <div class="alert alert-danger">{{ error }}</div>
-                {% endif %}
-                
-                <form method="POST" action="{{ url_for('login') }}">
-                    {{ form.hidden_tag() }}
-                    <div class="mb-3">
-                        {{ form.token.label(class="form-label") }}
-                        {{ form.token(class="form-control") }}
-                        <div class="form-text">
-                            You can obtain your token from Moodle. See the 
-                            <a href="https://github.com/yourusername/moodle-api-client/blob/main/docs/obtaining_api_token.md" target="_blank">documentation</a>.
-                        </div>
-                    </div>
-                    <div class="d-grid">
-                        {{ form.submit(class="btn btn-primary") }}
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock %}'''
-    
-    # Dashboard template
-    dashboard_html = '''{% extends "base.html" %}
-
-{% block title %}Dashboard - Moodle API Client{% endblock %}
-
-{% block content %}
-<h1 class="mb-4">Welcome, {{ username }}</h1>
-
-<h2 class="mb-3">Your Courses</h2>
-
-<div class="row row-cols-1 row-cols-md-3 g-4">
-    {% for course in courses %}
-        <div class="col">
-            <div class="card course-card">
-                <div class="card-body">
-                    <h5 class="card-title">{{ course.fullname }}</h5>
-                    <p class="card-text"><small class="text-muted">{{ course.shortname }}</small></p>
-                </div>
-                <div class="card-footer">
-                    <a href="{{ url_for('course_detail', course_id=course.id) }}" class="btn btn-primary">View Course</a>
-                </div>
-            </div>
-        </div>
-    {% else %}
-        <div class="col-12">
-            <div class="alert alert-info">You are not enrolled in any courses.</div>
-        </div>
-    {% endfor %}
-</div>
-{% endblock %}'''
-    
-    # Course detail template
-    course_detail_html = '''{% extends "base.html" %}
-
-{% block title %}{{ course.fullname }} - Moodle API Client{% endblock %}
-
-{% block content %}
-<nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
-        <li class="breadcrumb-item active">{{ course.fullname }}</li>
-    </ol>
-</nav>
-
-<h1 class="mb-4">{{ course.fullname }}</h1>
-<p><small class="text-muted">{{ course.shortname }}</small></p>
-
-<div class="row mt-4">
-    <div class="col-md-4 mb-3">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Grades</h5>
-                <p class="card-text">View your grades for this course.</p>
-                <a href="{{ url_for('course_grades', course_id=course.id) }}" class="btn btn-primary">View Grades</a>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-4 mb-3">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Lecture Notes</h5>
-                <p class="card-text">Access lecture notes and materials.</p>
-                <a href="{{ url_for('course_lecture_notes', course_id=course.id) }}" class="btn btn-primary">View Lecture Notes</a>
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock %}'''
-    
-    # Course grades template
-    course_grades_html = '''{% extends "base.html" %}
-
-{% block title %}Grades: {{ course.fullname }} - Moodle API Client{% endblock %}
-
-{% block content %}
-<nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
-        <li class="breadcrumb-item"><a href="{{ url_for('course_detail', course_id=course.id) }}">{{ course.fullname }}</a></li>
-        <li class="breadcrumb-item active">Grades</li>
-    </ol>
-</nav>
-
-<h1 class="mb-4">Grades for {{ course.fullname }}</h1>
-
-{% if grades and 'usergrades' in grades and grades.usergrades %}
-    {% set user_grades = grades.usergrades[0] %}
-    
-    {% if 'grade' in user_grades %}
-        <div class="alert alert-info">
-            <h4>Overall Course Grade: {{ user_grades.grade }}</h4>
-        </div>
-    {% endif %}
-    
-    {% if 'gradeitems' in user_grades and user_grades.gradeitems %}
-        <div class="table-responsive">
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Assessment</th>
-                        <th>Grade</th>
-                        <th>Weight</th>
-                        <th>Feedback</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in user_grades.gradeitems %}
-                        {% if item.itemname and item.itemname|lower != 'course total' %}
-                            <tr>
-                                <td>{{ item.itemname }}</td>
-                                <td>{{ item.gradeformatted|default('-') }}</td>
-                                <td>{{ item.weightformatted|default('-') }}</td>
-                                <td>{{ item.feedback|default('-') }}</td>
-                            </tr>
-                        {% endif %}
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    {% else %}
-        <div class="alert alert-warning">No grade items found for this course.</div>
-    {% endif %}
-    
-    {% if 'warnings' in grades and grades.warnings %}
-        <div class="alert alert-warning">
-            <h5>Warnings:</h5>
-            <ul>
-                {% for warning in grades.warnings %}
-                    <li>{{ warning.message }}</li>
-                {% endfor %}
-            </ul>
-        </div>
-    {% endif %}
-{% else %}
-    <div class="alert alert-warning">
-        No grades available for this course. This could be because:
-        <ul>
-            <li>There are no graded items yet</li>
-            <li>The Moodle API doesn't have permission to access grades</li>
-            <li>There was an error retrieving the grades</li>
-        </ul>
-    </div>
-{% endif %}
-{% endblock %}'''
-    
-    # Course lecture notes template
-    course_lecture_notes_html = '''{% extends "base.html" %}
-
-{% block title %}Lecture Notes: {{ course.fullname }} - Moodle API Client{% endblock %}
-
-{% block content %}
-<nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
-        <li class="breadcrumb-item"><a href="{{ url_for('course_detail', course_id=course.id) }}">{{ course.fullname }}</a></li>
-        <li class="breadcrumb-item active">Lecture Notes</li>
-    </ol>
-</nav>
-
-<h1 class="mb-4">Lecture Notes for {{ course.fullname }}</h1>
-
-{% if lecture_notes %}
-    <div class="accordion" id="lectureNotesAccordion">
-        {% for section in lecture_notes %}
-            <div class="accordion-item">
-                <h2 class="accordion-header" id="heading{{ loop.index }}">
-                    <button class="accordion-button {% if not loop.first %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.index }}">
-                        {{ section.name }}
-                    </button>
-                </h2>
-                <div id="collapse{{ loop.index }}" class="accordion-collapse collapse {% if loop.first %}show{% endif %}" data-bs-parent="#lectureNotesAccordion">
-                    <div class="accordion-body">
-                        <div class="list-group">
-                            {% for module in section.modules %}
-                                <div class="list-group-item lecture-note">
-                                    <h5>{{ module.name }}</h5>
-                                    <p><small class="text-muted">Type: {{ module.modname }}</small></p>
-                                    
-                                    {% if 'contents' in module %}
-                                        <ul class="list-unstyled">
-                                            {% for content in module.contents %}
-                                                <li class="mb-2">
-                                                    <div class="d-flex justify-content-between align-items-center">
-                                                        <div>
-                                                            <i class="bi bi-file-earmark"></i>
-                                                            {{ content.filename }}
-                                                            <small class="text-muted">({{ (content.filesize / 1024)|round(1) }} KB)</small>
-                                                        </div>
-                                                        {% if 'fileurl' in content %}
-                                                            <a href="{{ url_for('download_file', course_id=course.id, file_url=content.fileurl|replace('?', '___')|replace('&', '__')) }}" 
-                                                               class="btn btn-sm btn-outline-primary">
-                                                                Download
-                                                            </a>
-                                                        {% endif %}
-                                                    </div>
-                                                </li>
-                                            {% endfor %}
-                                        </ul>
-                                    {% elif module.modname == 'url' and 'url' in module %}
-                                        <a href="{{ module.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                            Open URL
-                                        </a>
-                                    {% endif %}
-                                </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        {% endfor %}
-    </div>
-{% else %}
-    <div class="alert alert-info">No lecture notes found for this course.</div>
-{% endif %}
-{% endblock %}'''
-    
-    # Write templates to files
-    with open(os.path.join(templates_dir, 'base.html'), 'w') as f:
-        f.write(base_html)
-    
-    with open(os.path.join(templates_dir, 'index.html'), 'w') as f:
-        f.write(index_html)
-    
-    with open(os.path.join(templates_dir, 'login.html'), 'w') as f:
-        f.write(login_html)
-    
-    with open(os.path.join(templates_dir, 'dashboard.html'), 'w') as f:
-        f.write(dashboard_html)
-    
-    with open(os.path.join(templates_dir, 'course_detail.html'), 'w') as f:
-        f.write(course_detail_html)
-    
-    with open(os.path.join(templates_dir, 'course_grades.html'), 'w') as f:
-        f.write(course_grades_html)
-    
-    with open(os.path.join(templates_dir, 'course_lecture_notes.html'), 'w') as f:
-        f.write(course_lecture_notes_html)

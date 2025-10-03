@@ -1,0 +1,369 @@
+{% extends "base.html" %}
+
+{% block title %}Brain Dump - StudyMaster{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        background: linear-gradient(135deg, #2d1b69 0%, #5c3d99 100%);
+    }
+    .brain-container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    .note-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(155, 89, 182, 0.3);
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 15px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    .note-card:hover {
+        background: rgba(255, 255, 255, 0.08);
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(155, 89, 182, 0.3);
+    }
+    .quick-capture {
+        background: rgba(155, 89, 182, 0.1);
+        border: 2px solid #9b59b6;
+        border-radius: 16px;
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+    .tag {
+        display: inline-block;
+        background: rgba(155, 89, 182, 0.2);
+        border: 1px solid #9b59b6;
+        padding: 5px 12px;
+        border-radius: 15px;
+        font-size: 12px;
+        margin: 3px;
+    }
+    .note-type {
+        background: #9b59b6;
+        color: #fff;
+        padding: 5px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    .back-home {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        background: rgba(0, 0, 0, 0.6);
+        color: #9b59b6;
+        padding: 10px 20px;
+        border-radius: 8px;
+        text-decoration: none;
+        border: 1px solid rgba(155, 89, 182, 0.3);
+        transition: all 0.3s ease;
+        z-index: 1000;
+    }
+    .back-home:hover {
+        background: rgba(155, 89, 182, 0.2);
+        transform: translateX(-5px);
+    }
+    .neon-button {
+        background: linear-gradient(45deg, #9b59b6, #8e44ad);
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        color: #fff;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    .neon-button:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 20px #9b59b6;
+    }
+    .voice-button {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #9b59b6, #8e44ad);
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 20px rgba(155, 89, 182, 0.4);
+    }
+    .voice-button:hover {
+        transform: scale(1.1);
+        box-shadow: 0 10px 30px rgba(155, 89, 182, 0.6);
+    }
+    .voice-button.recording {
+        animation: pulse 1s infinite;
+        background: linear-gradient(135deg, #e74c3c, #c0392b);
+    }
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+    }
+    .sidebar {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(155, 89, 182, 0.3);
+        border-radius: 16px;
+        padding: 25px;
+        position: sticky;
+        top: 20px;
+    }
+    .filter-btn {
+        background: rgba(155, 89, 182, 0.1);
+        border: 1px solid rgba(155, 89, 182, 0.3);
+        padding: 10px 15px;
+        border-radius: 8px;
+        margin: 5px 0;
+        width: 100%;
+        text-align: left;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    .filter-btn:hover, .filter-btn.active {
+        background: rgba(155, 89, 182, 0.3);
+        border-color: #9b59b6;
+    }
+    .search-box {
+        background: rgba(255, 255, 255, 0.05);
+        border: 2px solid rgba(155, 89, 182, 0.3);
+        border-radius: 12px;
+        padding: 15px;
+        color: #fff;
+        width: 100%;
+        margin-bottom: 20px;
+    }
+    .search-box:focus {
+        outline: none;
+        border-color: #9b59b6;
+        box-shadow: 0 0 20px rgba(155, 89, 182, 0.3);
+    }
+</style>
+
+<a href="{{ url_for('index') }}" class="back-home">← Back to Hub</a>
+
+<div class="brain-container">
+    <div class="text-center mb-5">
+        <h1 class="display-4" style="color: #9b59b6;">☁️ Brain Dump</h1>
+        <p class="lead text-white-50">Capture Ideas, Thoughts & Notes Instantly</p>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3">
+            <div class="sidebar">
+                <h5 style="color: #9b59b6; margin-bottom: 20px;">Filters</h5>
+
+                <button class="filter-btn active">📝 All Notes (24)</button>
+                <button class="filter-btn">💡 Quick Thoughts (12)</button>
+                <button class="filter-btn">🎤 Voice Memos (5)</button>
+                <button class="filter-btn">📚 Study Notes (7)</button>
+
+                <hr style="border-color: rgba(255,255,255,0.2); margin: 20px 0;">
+
+                <h5 style="color: #9b59b6; margin-bottom: 15px;">Tags</h5>
+
+                <div class="tag">#ideas</div>
+                <div class="tag">#todo</div>
+                <div class="tag">#important</div>
+                <div class="tag">#exam</div>
+                <div class="tag">#questions</div>
+                <div class="tag">#research</div>
+
+                <hr style="border-color: rgba(255,255,255,0.2); margin: 20px 0;">
+
+                <h5 style="color: #9b59b6; margin-bottom: 15px;">Stats</h5>
+
+                <p class="mb-2">
+                    <small class="text-white-50">Total Notes</small><br>
+                    <strong>24</strong>
+                </p>
+
+                <p class="mb-2">
+                    <small class="text-white-50">This Week</small><br>
+                    <strong>12</strong>
+                </p>
+
+                <p class="mb-2">
+                    <small class="text-white-50">Voice Memos</small><br>
+                    <strong>5</strong>
+                </p>
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            <div class="quick-capture">
+                <h4 style="color: #9b59b6; margin-bottom: 20px;">⚡ Quick Capture</h4>
+
+                <div class="row mb-3">
+                    <div class="col-md-8">
+                        <textarea class="form-control" rows="4" placeholder="Brain dump here... Type anything that comes to mind!" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(155,89,182,0.3); color: #fff;"></textarea>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <p class="text-white-50 mb-3">Or speak your thoughts</p>
+                        <div class="voice-button mx-auto" id="voiceBtn" onclick="toggleVoice()">
+                            🎤
+                        </div>
+                        <p class="text-white-50 mt-2 mb-0"><small id="voiceStatus">Click to start</small></p>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 mb-3">
+                    <input type="text" class="form-control form-control-sm" placeholder="Add tags..." style="background: rgba(255,255,255,0.05); border: 1px solid rgba(155,89,182,0.3); color: #fff; max-width: 200px;">
+                    <select class="form-select form-select-sm" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(155,89,182,0.3); color: #fff; max-width: 150px;">
+                        <option>Type: Thought</option>
+                        <option>Type: Study Note</option>
+                        <option>Type: Todo</option>
+                        <option>Type: Question</option>
+                    </select>
+                </div>
+
+                <button class="btn neon-button">💾 Save Note</button>
+                <button class="btn" style="background: rgba(255,255,255,0.1); color: #fff; border: none; padding: 12px 24px; border-radius: 8px;">Clear</button>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 style="color: #9b59b6;">Recent Notes</h4>
+                <input type="text" class="search-box" placeholder="🔍 Search notes..." style="max-width: 300px; padding: 10px; margin: 0;">
+            </div>
+
+            <div class="note-card">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                        <span class="note-type">💡 Thought</span>
+                        <span class="tag">#exam</span>
+                        <span class="tag">#important</span>
+                    </div>
+                    <small class="text-white-50">5 minutes ago</small>
+                </div>
+                <p class="mb-0">Need to review chapters 5-7 for the COMP 232 midterm. Focus on recursion and time complexity. Ask prof about the assignment 3 deadline.</p>
+            </div>
+
+            <div class="note-card">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                        <span class="note-type">🎤 Voice</span>
+                        <span class="tag">#ideas</span>
+                    </div>
+                    <small class="text-white-50">1 hour ago</small>
+                </div>
+                <p class="mb-2">🔊 Voice memo (0:47)</p>
+                <audio controls style="width: 100%; max-width: 400px;">
+                    <source src="" type="audio/mpeg">
+                </audio>
+                <p class="mb-0 mt-2"><small class="text-white-50">Transcription: "Remember to study with Sarah tomorrow at 3pm. Bring the notes from last week's lecture..."</small></p>
+            </div>
+
+            <div class="note-card">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                        <span class="note-type">📚 Study</span>
+                        <span class="tag">#research</span>
+                        <span class="tag">#todo</span>
+                    </div>
+                    <small class="text-white-50">3 hours ago</small>
+                </div>
+                <p class="mb-0">Key points from today's lecture: Binary search trees, AVL trees, balancing operations. Need to practice rotations. Check out the visualization tool the professor mentioned.</p>
+            </div>
+
+            <div class="note-card">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                        <span class="note-type">❓ Question</span>
+                        <span class="tag">#questions</span>
+                    </div>
+                    <small class="text-white-50">Yesterday</small>
+                </div>
+                <p class="mb-0">What's the difference between depth-first and breadth-first search? When would you use one over the other? Need to ask in office hours.</p>
+            </div>
+
+            <div class="note-card">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                        <span class="note-type">💡 Thought</span>
+                        <span class="tag">#ideas</span>
+                    </div>
+                    <small class="text-white-50">2 days ago</small>
+                </div>
+                <p class="mb-0">Project idea: Build a web app that helps students track their study time and generate insights. Could use Moodle API integration. Maybe add gamification?</p>
+            </div>
+
+            <div class="note-card">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                        <span class="note-type">📝 Todo</span>
+                        <span class="tag">#todo</span>
+                        <span class="tag">#exam</span>
+                    </div>
+                    <small class="text-white-50">3 days ago</small>
+                </div>
+                <p class="mb-0">
+                    ✅ Review Chapter 3 notes<br>
+                    ✅ Complete practice problems<br>
+                    ⬜ Make flashcards for key concepts<br>
+                    ⬜ Join study group Thursday
+                </p>
+            </div>
+
+            <div class="text-center mt-4">
+                <button class="btn neon-button">Load More Notes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let isRecording = false;
+
+    function toggleVoice() {
+        const btn = document.getElementById('voiceBtn');
+        const status = document.getElementById('voiceStatus');
+
+        isRecording = !isRecording;
+
+        if (isRecording) {
+            btn.classList.add('recording');
+            btn.textContent = '⏸️';
+            status.textContent = 'Recording...';
+
+            // Simulate recording
+            setTimeout(() => {
+                btn.classList.remove('recording');
+                btn.textContent = '🎤';
+                status.textContent = 'Click to start';
+                isRecording = false;
+                alert('Voice memo saved! (Demo mode)');
+            }, 3000);
+        } else {
+            btn.classList.remove('recording');
+            btn.textContent = '🎤';
+            status.textContent = 'Click to start';
+        }
+    }
+
+    // Filter buttons
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+
+    // Note card click to expand
+    document.querySelectorAll('.note-card').forEach(card => {
+        card.addEventListener('click', function(e) {
+            if (e.target.tagName !== 'AUDIO') {
+                this.style.background = 'rgba(155, 89, 182, 0.15)';
+                setTimeout(() => {
+                    this.style.background = 'rgba(255, 255, 255, 0.05)';
+                }, 200);
+            }
+        });
+    });
+</script>
+{% endblock %}

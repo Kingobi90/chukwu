@@ -1,18 +1,28 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
-import { flashcardsAPI } from '@/lib/api'
-import { ArrowLeft, RotateCcw, Check, X } from 'lucide-react'
+import { flashcardsAPI, coursesAPI } from '@/lib/api'
+import { ArrowLeft, RotateCcw, Check, X, Plus } from 'lucide-react'
 
 export default function SmartStudy() {
   const [currentCardIndex, setCurrentCardIndex] = useState(0)
   const [showAnswer, setShowAnswer] = useState(false)
+  const [showCreateForm, setShowCreateForm] = useState(false)
+  const [newCard, setNewCard] = useState({ front: '', back: '', course_id: '' })
   const queryClient = useQueryClient()
 
   const { data: dueCards, isLoading } = useQuery({
     queryKey: ['dueFlashcards'],
     queryFn: async () => {
       const response = await flashcardsAPI.getDueFlashcards()
+      return response.data
+    },
+  })
+
+  const { data: courses } = useQuery({
+    queryKey: ['courses'],
+    queryFn: async () => {
+      const response = await coursesAPI.getCourses()
       return response.data
     },
   })
@@ -24,6 +34,16 @@ export default function SmartStudy() {
       queryClient.invalidateQueries({ queryKey: ['dueFlashcards'] })
       setShowAnswer(false)
       setCurrentCardIndex((prev) => prev + 1)
+    },
+  })
+
+  const createMutation = useMutation({
+    mutationFn: (data: { front: string; back: string; course_id: string }) =>
+      flashcardsAPI.createFlashcard(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dueFlashcards'] })
+      setShowCreateForm(false)
+      setNewCard({ front: '', back: '', course_id: '' })
     },
   })
 
@@ -79,10 +99,76 @@ export default function SmartStudy() {
             Back to Dashboard
           </Link>
           
-          <div className="text-white">
-            Card {currentCardIndex + 1} of {dueCards.length}
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setShowCreateForm(!showCreateForm)}
+              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 rounded-lg transition-all"
+            >
+              <Plus className="w-4 h-4" />
+              Create Card
+            </button>
+            <div className="text-white">
+              Card {currentCardIndex + 1} of {dueCards.length}
+            </div>
           </div>
         </div>
+
+        {/* Create Card Form */}
+        {showCreateForm && (
+          <div className="glass p-6 rounded-2xl mb-8">
+            <h3 className="text-xl font-bold text-white mb-4">Create New Flashcard</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">Course</label>
+                <select
+                  value={newCard.course_id}
+                  onChange={(e) => setNewCard({ ...newCard, course_id: e.target.value })}
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-teal-500"
+                >
+                  <option value="">Select a course</option>
+                  {courses?.map((course: any) => (
+                    <option key={course.id} value={course.id}>
+                      {course.fullname}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">Question (Front)</label>
+                <textarea
+                  value={newCard.front}
+                  onChange={(e) => setNewCard({ ...newCard, front: e.target.value })}
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-teal-500 h-24"
+                  placeholder="Enter your question..."
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">Answer (Back)</label>
+                <textarea
+                  value={newCard.back}
+                  onChange={(e) => setNewCard({ ...newCard, back: e.target.value })}
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-teal-500 h-24"
+                  placeholder="Enter your answer..."
+                />
+              </div>
+              <div className="flex gap-4">
+                <button
+                  onClick={() => createMutation.mutate(newCard)}
+                  disabled={!newCard.front || !newCard.back || !newCard.course_id || createMutation.isPending}
+                  className="flex-1 px-4 py-2 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium"
+                >
+                  {createMutation.isPending ? 'Creating...' : 'Create Flashcard'}
+                </button>
+                <button
+                  onClick={() => setShowCreateForm(false)}
+                  className="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors text-white"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Flashcard */}
         <div className="glass p-12 rounded-2xl mb-8 min-h-[400px] flex flex-col items-center justify-center">

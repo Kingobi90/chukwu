@@ -1,0 +1,352 @@
+{% extends "base.html" %}
+
+{% block title %}Smart Study - StudyMaster{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+    }
+    .smart-container {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+    .feature-section {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 30px;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+    }
+    .flashcard {
+        background: linear-gradient(135deg, rgba(78, 205, 196, 0.1), rgba(69, 183, 209, 0.1));
+        border: 2px solid rgba(78, 205, 196, 0.3);
+        border-radius: 16px;
+        padding: 40px;
+        min-height: 300px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.5s ease;
+        perspective: 1000px;
+    }
+    .flashcard:hover {
+        transform: rotateY(10deg);
+        box-shadow: 0 20px 40px rgba(78, 205, 196, 0.3);
+    }
+    .flashcard.flipped {
+        transform: rotateY(180deg);
+    }
+    .flashcard-content {
+        font-size: 24px;
+        font-weight: 500;
+    }
+    .progress-ring {
+        background: conic-gradient(#00ff88 var(--progress), rgba(255,255,255,0.1) 0);
+        border-radius: 50%;
+        width: 120px;
+        height: 120px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+    }
+    .progress-ring::before {
+        content: attr(data-progress);
+        position: absolute;
+        width: 100px;
+        height: 100px;
+        background: #1a1a2e;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        font-weight: bold;
+        color: #00ff88;
+    }
+    .topic-chip {
+        display: inline-block;
+        background: rgba(0, 255, 136, 0.2);
+        border: 1px solid #00ff88;
+        padding: 8px 16px;
+        border-radius: 20px;
+        margin: 5px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    .topic-chip:hover {
+        background: rgba(0, 255, 136, 0.4);
+        transform: scale(1.05);
+    }
+    .topic-chip.active {
+        background: #00ff88;
+        color: #000;
+    }
+    .quiz-option {
+        background: rgba(255, 255, 255, 0.05);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        padding: 20px;
+        border-radius: 12px;
+        margin: 10px 0;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    .quiz-option:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: #00ff88;
+    }
+    .quiz-option.correct {
+        background: rgba(0, 255, 136, 0.2);
+        border-color: #00ff88;
+    }
+    .quiz-option.wrong {
+        background: rgba(255, 107, 107, 0.2);
+        border-color: #ff6b6b;
+    }
+    .back-home {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        background: rgba(0, 0, 0, 0.6);
+        color: #4ecdc4;
+        padding: 10px 20px;
+        border-radius: 8px;
+        text-decoration: none;
+        border: 1px solid rgba(78, 205, 196, 0.3);
+        transition: all 0.3s ease;
+        z-index: 1000;
+    }
+    .back-home:hover {
+        background: rgba(78, 205, 196, 0.1);
+        transform: translateX(-5px);
+    }
+    .neon-button {
+        background: linear-gradient(45deg, #4ecdc4, #45b7d1);
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        color: #000;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    .neon-button:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 20px #4ecdc4;
+    }
+</style>
+
+<a href="{{ url_for('index') }}" class="back-home">← Back to Hub</a>
+
+<div class="smart-container">
+    <div class="text-center mb-5">
+        <h1 class="display-4" style="color: #4ecdc4;">🧠 Smart Study</h1>
+        <p class="lead text-white-50">AI-Powered Learning & Spaced Repetition</p>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="feature-section">
+                <h3 style="color: #4ecdc4;">📇 AI Flashcards</h3>
+                <p class="text-white-50">Study with AI-generated flashcards from your course materials</p>
+
+                <div class="mb-4">
+                    <select class="form-select mb-3">
+                        <option>Select a course...</option>
+                        {% for course in courses %}
+                        <option value="{{ course.id }}">{{ course.fullname }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <div class="topic-chip active">All Topics</div>
+                    <div class="topic-chip">Functions</div>
+                    <div class="topic-chip">Algorithms</div>
+                    <div class="topic-chip">Data Structures</div>
+                    <div class="topic-chip">Complexity</div>
+                </div>
+
+                <div class="flashcard" onclick="this.classList.toggle('flipped')">
+                    <div class="flashcard-content">
+                        <div class="front">
+                            <h4>What is Big O notation?</h4>
+                            <small class="text-white-50">Click to reveal answer</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <button class="btn neon-button">❌ Hard</button>
+                    <button class="btn neon-button">🤔 Medium</button>
+                    <button class="btn neon-button">✅ Easy</button>
+                    <button class="btn neon-button">➡️ Next Card</button>
+                </div>
+
+                <div class="mt-4 text-center">
+                    <small class="text-white-50">Card 3 of 47 • Due for review: 15 cards</small>
+                </div>
+            </div>
+
+            <div class="feature-section">
+                <h3 style="color: #4ecdc4;">🎯 Practice Quiz</h3>
+                <p class="text-white-50">Test your knowledge with AI-generated questions</p>
+
+                <div class="mb-4">
+                    <h5>Which of the following best describes a hash table?</h5>
+
+                    <div class="quiz-option">
+                        A) A linear data structure that stores elements sequentially
+                    </div>
+                    <div class="quiz-option">
+                        B) A data structure that maps keys to values for efficient lookup
+                    </div>
+                    <div class="quiz-option">
+                        C) A tree-based structure with parent-child relationships
+                    </div>
+                    <div class="quiz-option">
+                        D) A collection of nodes connected by edges
+                    </div>
+                </div>
+
+                <button class="btn neon-button">Submit Answer</button>
+                <button class="btn neon-button">Skip Question</button>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="feature-section">
+                <h3 style="color: #4ecdc4;">📊 Your Progress</h3>
+
+                <div class="text-center mb-4">
+                    <div class="progress-ring mx-auto" style="--progress: 65%" data-progress="65%"></div>
+                    <p class="mt-3 text-white-50">Overall Mastery</p>
+                </div>
+
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>COMP 232</span>
+                        <span class="text-success">78%</span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-success" style="width: 78%"></div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>SOEN 331</span>
+                        <span class="text-warning">56%</span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-warning" style="width: 56%"></div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>ENGR 201</span>
+                        <span class="text-info">62%</span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-info" style="width: 62%"></div>
+                    </div>
+                </div>
+
+                <hr style="border-color: rgba(255,255,255,0.2);">
+
+                <h5 style="color: #4ecdc4;">🔥 Study Streak</h5>
+                <h2>7 Days</h2>
+                <p class="text-white-50">Keep it up! 3 more days for a new record.</p>
+
+                <hr style="border-color: rgba(255,255,255,0.2);">
+
+                <h5 style="color: #4ecdc4;">📅 Due Today</h5>
+                <ul class="list-unstyled">
+                    <li class="mb-2">📇 15 flashcards to review</li>
+                    <li class="mb-2">🎯 2 practice quizzes</li>
+                    <li class="mb-2">📚 3 new topics to learn</li>
+                </ul>
+            </div>
+
+            <div class="feature-section">
+                <h3 style="color: #4ecdc4;">⚙️ Study Settings</h3>
+
+                <div class="mb-3">
+                    <label>Cards per session</label>
+                    <input type="range" class="form-range" min="5" max="50" value="20">
+                    <small class="text-white-50">20 cards</small>
+                </div>
+
+                <div class="mb-3">
+                    <label>Difficulty</label>
+                    <select class="form-select form-select-sm">
+                        <option>Beginner</option>
+                        <option selected>Intermediate</option>
+                        <option>Advanced</option>
+                        <option>Expert</option>
+                    </select>
+                </div>
+
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" checked>
+                    <label class="form-check-label">Show hints</label>
+                </div>
+
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" checked>
+                    <label class="form-check-label">Text-to-speech</label>
+                </div>
+
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox">
+                    <label class="form-check-label">Dark mode cards</label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="feature-section">
+        <h3 style="color: #4ecdc4;">🚀 Generate New Flashcards</h3>
+        <p class="text-white-50">Upload study materials or select from Moodle to auto-generate flashcards</p>
+
+        <div class="row">
+            <div class="col-md-6">
+                <button class="btn neon-button w-100 mb-3">
+                    📂 Select from Moodle Files
+                </button>
+            </div>
+            <div class="col-md-6">
+                <button class="btn neon-button w-100 mb-3">
+                    📤 Upload PDF/Document
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Quiz option selection
+    document.querySelectorAll('.quiz-option').forEach(option => {
+        option.addEventListener('click', function() {
+            document.querySelectorAll('.quiz-option').forEach(o => {
+                o.classList.remove('selected');
+                o.style.background = 'rgba(255, 255, 255, 0.05)';
+            });
+            this.classList.add('selected');
+            this.style.background = 'rgba(255, 255, 255, 0.1)';
+        });
+    });
+
+    // Topic chip selection
+    document.querySelectorAll('.topic-chip').forEach(chip => {
+        chip.addEventListener('click', function() {
+            document.querySelectorAll('.topic-chip').forEach(c => c.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+</script>
+{% endblock %}

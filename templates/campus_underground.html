@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+
+{% block title %}Campus Underground - StudyMaster{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    }
+    .underground-container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    .feature-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 30px;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+    }
+    .feature-card:hover {
+        background: rgba(255, 255, 255, 0.08);
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 255, 136, 0.2);
+    }
+    .neon-button {
+        background: linear-gradient(45deg, #00ff88, #00cc6a);
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        color: #000;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    .neon-button:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 20px #00ff88;
+    }
+    .study-group-card {
+        background: rgba(78, 205, 196, 0.1);
+        border: 1px solid rgba(78, 205, 196, 0.3);
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 15px;
+    }
+    .resource-item {
+        background: rgba(255, 255, 255, 0.03);
+        border-left: 3px solid #00ff88;
+        padding: 15px;
+        margin-bottom: 10px;
+        border-radius: 4px;
+    }
+    .back-home {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        background: rgba(0, 0, 0, 0.6);
+        color: #00ff88;
+        padding: 10px 20px;
+        border-radius: 8px;
+        text-decoration: none;
+        border: 1px solid rgba(0, 255, 136, 0.3);
+        transition: all 0.3s ease;
+        z-index: 1000;
+    }
+    .back-home:hover {
+        background: rgba(0, 255, 136, 0.1);
+        transform: translateX(-5px);
+    }
+</style>
+
+<a href="{{ url_for('index') }}" class="back-home">← Back to Hub</a>
+
+<div class="underground-container">
+    <div class="text-center mb-5">
+        <h1 class="display-4" style="color: #00ff88;">🏛️ Campus Underground</h1>
+        <p class="lead text-white-50">Connect, Collaborate, Conquer</p>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="feature-card">
+                <h3 style="color: #00ff88;">📚 Active Study Groups</h3>
+                <p class="text-white-50">Join or create study groups for your courses</p>
+
+                <div class="study-group-card">
+                    <h5>COMP 232 - Study Squad</h5>
+                    <p class="text-white-50 mb-2">5 members • Next session: Today 7PM</p>
+                    <button class="btn btn-sm neon-button">Join Group</button>
+                </div>
+
+                <div class="study-group-card">
+                    <h5>SOEN 331 - Final Prep Crew</h5>
+                    <p class="text-white-50 mb-2">8 members • Next session: Tomorrow 3PM</p>
+                    <button class="btn btn-sm neon-button">Join Group</button>
+                </div>
+
+                <div class="study-group-card">
+                    <h5>ENGR 201 - Late Night Grinders</h5>
+                    <p class="text-white-50 mb-2">12 members • Next session: Tonight 9PM</p>
+                    <button class="btn btn-sm neon-button">Join Group</button>
+                </div>
+
+                <button class="btn neon-button w-100 mt-3">Create New Study Group</button>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="feature-card">
+                <h3 style="color: #00ff88;">🎯 Find Study Buddies</h3>
+                <p class="text-white-50">Connect with students in your courses</p>
+
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" placeholder="Search by course or major...">
+                    <button class="btn neon-button">Search</button>
+                </div>
+
+                <div class="resource-item">
+                    <strong>Alex M.</strong> - Computer Science<br>
+                    <small class="text-white-50">Looking for COMP 232 study partner • Available weekends</small>
+                    <button class="btn btn-sm neon-button mt-2">Connect</button>
+                </div>
+
+                <div class="resource-item">
+                    <strong>Sarah K.</strong> - Software Engineering<br>
+                    <small class="text-white-50">Need help with SOEN 331 • Can tutor COMP 248</small>
+                    <button class="btn btn-sm neon-button mt-2">Connect</button>
+                </div>
+
+                <div class="resource-item">
+                    <strong>James L.</strong> - Electrical Engineering<br>
+                    <small class="text-white-50">Starting ENGR 201 study group • Monday & Wednesday</small>
+                    <button class="btn btn-sm neon-button mt-2">Connect</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="feature-card">
+                <h3 style="color: #00ff88;">📝 Shared Resources</h3>
+                <p class="text-white-50">Community-contributed study materials and notes</p>
+
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="resource-item">
+                            <strong>📄 COMP 232 Midterm Review</strong><br>
+                            <small class="text-white-50">Uploaded by Alex M. • 142 downloads</small>
+                            <button class="btn btn-sm neon-button mt-2 w-100">Download</button>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="resource-item">
+                            <strong>📊 SOEN 331 Cheat Sheet</strong><br>
+                            <small class="text-white-50">Uploaded by Sarah K. • 89 downloads</small>
+                            <button class="btn btn-sm neon-button mt-2 w-100">Download</button>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="resource-item">
+                            <strong>🔧 ENGR 201 Lab Guide</strong><br>
+                            <small class="text-white-50">Uploaded by James L. • 67 downloads</small>
+                            <button class="btn btn-sm neon-button mt-2 w-100">Download</button>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn neon-button w-100 mt-4">Upload Your Resources</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="feature-card">
+                <h3 style="color: #00ff88;">💬 Quick Questions Board</h3>
+                <p class="text-white-50">Ask quick questions and get answers from peers</p>
+
+                <div class="mb-3">
+                    <textarea class="form-control" rows="3" placeholder="Ask a question..."></textarea>
+                    <button class="btn neon-button mt-2">Post Question</button>
+                </div>
+
+                <div class="resource-item">
+                    <strong>Q: Anyone know how to solve problem 3.2 in COMP 232?</strong><br>
+                    <small class="text-white-50">Posted by Alex M. • 5 minutes ago • 3 answers</small>
+                </div>
+
+                <div class="resource-item">
+                    <strong>Q: What's covered in the SOEN 331 final?</strong><br>
+                    <small class="text-white-50">Posted by Sarah K. • 1 hour ago • 7 answers</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Add interactivity
+    document.querySelectorAll('.neon-button').forEach(button => {
+        button.addEventListener('click', function(e) {
+            if (this.textContent.includes('Join Group')) {
+                this.textContent = '✓ Joined';
+                this.style.background = 'rgba(0, 255, 136, 0.2)';
+            } else if (this.textContent.includes('Connect')) {
+                this.textContent = '✓ Connected';
+                this.style.background = 'rgba(0, 255, 136, 0.2)';
+            }
+        });
+    });
+</script>
+{% endblock %}

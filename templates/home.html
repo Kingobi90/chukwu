@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyMaster - Your Brutally Honest AI Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #000000;
+            min-height: 100vh;
+            color: #ffffff;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .ai-splash {
+            position: relative;
+            text-align: center;
+            margin-bottom: 80px;
+            z-index: 10;
+        }
+
+        .neon-orb {
+            width: 300px;
+            height: 300px;
+            margin: 0 auto 40px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .orb-core {
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle, #00ff88 0%, #00cc6a 50%, #008844 100%);
+            border-radius: 50%;
+            position: relative;
+            animation: pulse 2s ease-in-out infinite;
+            box-shadow:
+                0 0 40px #00ff88,
+                0 0 80px #00ff8844,
+                0 0 120px #00ff8822;
+            cursor: pointer;
+        }
+
+        .wave-ring {
+            position: absolute;
+            border: 2px solid #00ff88;
+            border-radius: 50%;
+            animation: wave-expand 3s ease-out infinite;
+        }
+
+        .wave-ring:nth-child(1) {
+            width: 140px;
+            height: 140px;
+            animation-delay: 0s;
+        }
+
+        .wave-ring:nth-child(2) {
+            width: 180px;
+            height: 180px;
+            animation-delay: 0.5s;
+        }
+
+        .wave-ring:nth-child(3) {
+            width: 220px;
+            height: 220px;
+            animation-delay: 1s;
+        }
+
+        .wave-ring:nth-child(4) {
+            width: 260px;
+            height: 260px;
+            animation-delay: 1.5s;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow:
+                    0 0 40px #00ff88,
+                    0 0 80px #00ff8844,
+                    0 0 120px #00ff8822;
+            }
+            50% {
+                transform: scale(1.1);
+                box-shadow:
+                    0 0 60px #00ff88,
+                    0 0 120px #00ff8866,
+                    0 0 180px #00ff8833;
+            }
+        }
+
+        @keyframes wave-expand {
+            0% {
+                transform: scale(0.8);
+                opacity: 1;
+                border-color: #00ff88;
+            }
+            100% {
+                transform: scale(2);
+                opacity: 0;
+                border-color: #00ff8800;
+            }
+        }
+
+        .ai-message {
+            font-size: 24px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 12px;
+            text-shadow: 0 0 20px #00ff8844;
+            animation: message-glow 4s ease-in-out infinite;
+            min-height: 30px;
+        }
+
+        .ai-subtext {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.6);
+            font-weight: 400;
+        }
+
+        @keyframes message-glow {
+            0%, 100% {
+                text-shadow: 0 0 20px #00ff8844;
+            }
+            50% {
+                text-shadow: 0 0 30px #00ff8866, 0 0 40px #00ff8844;
+            }
+        }
+
+        .sections-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            max-width: 900px;
+            width: 100%;
+            padding: 0 20px;
+        }
+
+        .section-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 25px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .section-card:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(0, 255, 136, 0.3);
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 255, 136, 0.1);
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .section-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00ff88, transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .section-card:hover::before {
+            transform: translateX(100%);
+        }
+
+        .section-icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 16px;
+            background: rgba(0, 255, 136, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            font-size: 24px;
+        }
+
+        .section-card:hover .section-icon {
+            transform: scale(1.1);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #ffffff;
+        }
+
+        .section-subtitle {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.5);
+            line-height: 1.4;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+            margin-top: 8px;
+            height: 0;
+            overflow: hidden;
+        }
+
+        .section-card:hover .section-subtitle {
+            opacity: 1;
+            transform: translateY(0);
+            height: auto;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: #00ff88;
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: float-particle 6s ease-in-out infinite;
+        }
+
+        @keyframes float-particle {
+            0%, 100% {
+                transform: translateY(0) translateX(0);
+                opacity: 0.3;
+            }
+            50% {
+                transform: translateY(-20px) translateX(10px);
+                opacity: 0.6;
+            }
+        }
+
+        .typing-cursor {
+            display: inline-block;
+            width: 2px;
+            height: 24px;
+            background: #00ff88;
+            margin-left: 2px;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .sections-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+
+            .ai-message {
+                font-size: 20px;
+            }
+
+            .neon-orb {
+                width: 250px;
+                height: 250px;
+            }
+
+            .orb-core {
+                width: 100px;
+                height: 100px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sections-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .ai-message {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="particle" style="top: 10%; left: 20%; animation-delay: 0s;"></div>
+    <div class="particle" style="top: 20%; left: 80%; animation-delay: 1s;"></div>
+    <div class="particle" style="top: 70%; left: 10%; animation-delay: 2s;"></div>
+    <div class="particle" style="top: 80%; left: 90%; animation-delay: 3s;"></div>
+    <div class="particle" style="top: 50%; left: 50%; animation-delay: 4s;"></div>
+
+    <div class="ai-splash">
+        <div class="neon-orb">
+            <div class="wave-ring"></div>
+            <div class="wave-ring"></div>
+            <div class="wave-ring"></div>
+            <div class="wave-ring"></div>
+            <div class="orb-core" onclick="{% if 'username' not in session %}location.href='{{ url_for('login') }}'{% endif %}"></div>
+        </div>
+        <div class="ai-message" id="ai-message">Welcome to StudyMaster<span class="typing-cursor"></span></div>
+        <div class="ai-subtext">{% if 'username' in session %}Ready to dominate your studies, {{ session['username'] }}{% else %}Click the orb to get started{% endif %}</div>
+    </div>
+
+    <div class="sections-grid">
+        <a href="{{ url_for('campus_underground') }}" class="section-card">
+            <div class="section-icon"><i class="fas fa-users"></i></div>
+            <div class="section-title">Campus Underground</div>
+            <div class="section-subtitle">Connect with students, find study groups, share resources</div>
+        </a>
+
+        <a href="{{ url_for('smart_study') }}" class="section-card">
+            <div class="section-icon"><i class="fas fa-brain"></i></div>
+            <div class="section-title">Smart Study</div>
+            <div class="section-subtitle">AI-powered flashcards, spaced repetition, personalized learning</div>
+        </a>
+
+        <a href="{{ url_for('live_sync') }}" class="section-card">
+            <div class="section-icon"><i class="fas fa-sync-alt"></i></div>
+            <div class="section-title">Live Class Sync</div>
+            <div class="section-subtitle">Real-time Moodle integration, automatic note processing</div>
+        </a>
+
+        <a href="{{ url_for('focus_mode') }}" class="section-card">
+            <div class="section-icon"><i class="fas fa-bullseye"></i></div>
+            <div class="section-title">Focus Mode</div>
+            <div class="section-subtitle">Distraction-free studying, pomodoro timers, flow state</div>
+        </a>
+
+        <a href="{{ url_for('accountability') }}" class="section-card">
+            <div class="section-icon"><i class="fas fa-trophy"></i></div>
+            <div class="section-title">Accountability Circle</div>
+            <div class="section-subtitle">Study buddies, progress sharing, competitive learning</div>
+        </a>
+
+        <a href="{{ url_for('brain_dump') }}" class="section-card">
+            <div class="section-icon"><i class="fas fa-lightbulb"></i></div>
+            <div class="section-title">Brain Dump</div>
+            <div class="section-subtitle">Quick notes, thoughts, ideas, voice memos</div>
+        </a>
+    </div>
+
+    <script>
+        const aiMessages = [
+            "Welcome to StudyMaster",
+            {% if 'username' in session %}
+            "Great to see you back",
+            "Time to lock in and focus",
+            "Your grades need attention",
+            "Excellence requires consistency",
+            "Every minute counts now"
+            {% else %}
+            "Click the orb to begin",
+            "Your AI study coach awaits",
+            "Transform your study habits",
+            "Achieve academic excellence"
+            {% endif %}
+        ];
+
+        let currentMessageIndex = 0;
+        const messageElement = document.getElementById('ai-message');
+        const cursor = messageElement.querySelector('.typing-cursor');
+
+        function typeMessage(message) {
+            messageElement.textContent = '';
+            messageElement.appendChild(cursor);
+
+            let i = 0;
+            const typingSpeed = 80;
+
+            function typeChar() {
+                if (i < message.length) {
+                    messageElement.textContent = message.substring(0, i + 1);
+                    messageElement.appendChild(cursor);
+                    i++;
+                    setTimeout(typeChar, typingSpeed);
+                } else {
+                    setTimeout(() => {
+                        currentMessageIndex = (currentMessageIndex + 1) % aiMessages.length;
+                        typeMessage(aiMessages[currentMessageIndex]);
+                    }, 3000);
+                }
+            }
+
+            typeChar();
+        }
+
+        setTimeout(() => {
+            currentMessageIndex = 1;
+            if (aiMessages.length > 1) {
+                typeMessage(aiMessages[currentMessageIndex]);
+            }
+        }, 3000);
+
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.top = Math.random() * 100 + '%';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 6 + 's';
+            document.body.appendChild(particle);
+
+            setTimeout(() => {
+                particle.remove();
+            }, 6000);
+        }
+
+        setInterval(createParticle, 2000);
+    </script>
+</body>
+</html>

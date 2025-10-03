@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { coursesAPI, flashcardsAPI, focusAPI } from '@/lib/api'
 import { useAuth } from '@/hooks/useAuth'
@@ -10,11 +10,15 @@ import {
   Zap, 
   StickyNote,
   LogOut,
-  TrendingUp
+  TrendingUp,
+  RefreshCw
 } from 'lucide-react'
+import { useState } from 'react'
 
 export default function Dashboard() {
   const { user, logout } = useAuth()
+  const queryClient = useQueryClient()
+  const [syncMessage, setSyncMessage] = useState('')
 
   const { data: courses } = useQuery({
     queryKey: ['courses'],
@@ -37,6 +41,19 @@ export default function Dashboard() {
     queryFn: async () => {
       const response = await focusAPI.getStats()
       return response.data
+    },
+  })
+
+  const syncCoursesMutation = useMutation({
+    mutationFn: () => coursesAPI.syncCourses(),
+    onSuccess: (response) => {
+      queryClient.invalidateQueries({ queryKey: ['courses'] })
+      setSyncMessage(`✅ Synced ${response.data.synced_count} courses successfully!`)
+      setTimeout(() => setSyncMessage(''), 5000)
+    },
+    onError: (error: any) => {
+      setSyncMessage(`❌ Error: ${error.response?.data?.detail || 'Failed to sync courses'}`)
+      setTimeout(() => setSyncMessage(''), 5000)
     },
   })
 
@@ -104,6 +121,17 @@ export default function Dashboard() {
               <p className="text-sm text-gray-400 mt-1">Welcome back, {user?.username}!</p>
             </div>
             <div className="flex items-center gap-4">
+              <button
+                onClick={() => syncCoursesMutation.mutate()}
+                disabled={syncCoursesMutation.isPending}
+                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Sync courses from Moodle"
+              >
+                <RefreshCw className={`w-4 h-4 ${syncCoursesMutation.isPending ? 'animate-spin' : ''}`} />
+                <span className="text-sm font-medium">
+                  {syncCoursesMutation.isPending ? 'Syncing...' : 'Sync Courses'}
+                </span>
+              </button>
               <div className="text-right">
                 <p className="text-sm text-gray-400">Current Streak</p>
                 <p className="text-xl font-bold text-orange-400">
@@ -124,6 +152,13 @@ export default function Dashboard() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Sync Message */}
+        {syncMessage && (
+          <div className="mb-6 p-4 glass rounded-lg border border-purple-500/30 animate-fade-in">
+            <p className="text-center text-white">{syncMessage}</p>
+          </div>
+        )}
+
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="glass p-6 rounded-xl">

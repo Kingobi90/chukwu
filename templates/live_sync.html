@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+
+{% block title %}Live Class Sync - StudyMaster{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        background: linear-gradient(135deg, #141e30 0%, #243b55 100%);
+    }
+    .sync-container {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+    .course-sync-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(69, 183, 209, 0.3);
+        border-radius: 16px;
+        padding: 25px;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+    }
+    .course-sync-card:hover {
+        background: rgba(255, 255, 255, 0.08);
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(69, 183, 209, 0.2);
+    }
+    .material-item {
+        background: rgba(69, 183, 209, 0.1);
+        border-left: 3px solid #45b7d1;
+        padding: 15px;
+        margin: 10px 0;
+        border-radius: 4px;
+        transition: all 0.3s ease;
+    }
+    .material-item:hover {
+        background: rgba(69, 183, 209, 0.2);
+        transform: translateX(5px);
+    }
+    .sync-status {
+        display: inline-block;
+        padding: 5px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    .sync-status.synced {
+        background: rgba(0, 255, 136, 0.2);
+        color: #00ff88;
+    }
+    .sync-status.pending {
+        background: rgba(243, 156, 18, 0.2);
+        color: #f39c12;
+    }
+    .sync-status.new {
+        background: rgba(69, 183, 209, 0.2);
+        color: #45b7d1;
+        animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.6; }
+    }
+    .back-home {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        background: rgba(0, 0, 0, 0.6);
+        color: #45b7d1;
+        padding: 10px 20px;
+        border-radius: 8px;
+        text-decoration: none;
+        border: 1px solid rgba(69, 183, 209, 0.3);
+        transition: all 0.3s ease;
+        z-index: 1000;
+    }
+    .back-home:hover {
+        background: rgba(69, 183, 209, 0.1);
+        transform: translateX(-5px);
+    }
+    .neon-button {
+        background: linear-gradient(45deg, #45b7d1, #4ecdc4);
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        color: #000;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    .neon-button:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 20px #45b7d1;
+    }
+    .last-sync {
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.5);
+    }
+</style>
+
+<a href="{{ url_for('index') }}" class="back-home">← Back to Hub</a>
+
+<div class="sync-container">
+    <div class="text-center mb-5">
+        <h1 class="display-4" style="color: #45b7d1;">📡 Live Class Sync</h1>
+        <p class="lead text-white-50">Real-time Moodle Integration & Auto-Processing</p>
+        <button class="btn neon-button mt-3" onclick="syncNow()">🔄 Sync Now</button>
+        <p class="last-sync mt-2">Last synced: Just now</p>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="course-sync-card text-center">
+                <h3 style="color: #00ff88;">24</h3>
+                <p class="text-white-50 mb-0">Files Synced</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="course-sync-card text-center">
+                <h3 style="color: #f39c12;">5</h3>
+                <p class="text-white-50 mb-0">New Materials</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="course-sync-card text-center">
+                <h3 style="color: #45b7d1;">3</h3>
+                <p class="text-white-50 mb-0">Active Courses</p>
+            </div>
+        </div>
+    </div>
+
+    {% if all_contents %}
+        {% for item in all_contents %}
+        <div class="course-sync-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h4 style="color: #45b7d1;">{{ item.course.fullname }}</h4>
+                    <small class="text-white-50">{{ item.course.shortname }}</small>
+                </div>
+                <span class="sync-status synced">✓ Synced</span>
+            </div>
+
+            {% for section in item.contents %}
+                {% if section.modules %}
+                <div class="mb-3">
+                    <h6 style="color: rgba(255,255,255,0.8);">{{ section.name }}</h6>
+
+                    {% for module in section.modules %}
+                        {% if module.modname in ['resource', 'url', 'folder', 'page'] %}
+                        <div class="material-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>{{ module.name }}</strong>
+                                    <br>
+                                    <small class="text-white-50">
+                                        Type: {{ module.modname }}
+                                        {% if module.moddate %}• Updated {{ module.moddate }}{% endif %}
+                                    </small>
+                                </div>
+                                <div>
+                                    {% if module.modname == 'resource' %}
+                                        {% if module.contents %}
+                                            {% for content in module.contents %}
+                                                {% if content.filename.endswith('.pdf') %}
+                                                <button class="btn btn-sm neon-button">📄 Process PDF</button>
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% endif %}
+                                    {% endif %}
+                                    <button class="btn btn-sm neon-button">📥 View</button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+        {% endfor %}
+    {% else %}
+    <div class="course-sync-card text-center">
+        <h4 style="color: #45b7d1;">No Course Content Found</h4>
+        <p class="text-white-50">Make sure you're logged in with your Moodle credentials</p>
+        <a href="{{ url_for('login') }}" class="btn neon-button">Login to Moodle</a>
+    </div>
+    {% endif %}
+
+    <div class="course-sync-card">
+        <h4 style="color: #45b7d1;">⚙️ Sync Settings</h4>
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" checked>
+                    <label class="form-check-label">Auto-sync every 30 minutes</label>
+                </div>
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" checked>
+                    <label class="form-check-label">Process PDFs automatically</label>
+                </div>
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox">
+                    <label class="form-check-label">Create flashcards from new materials</label>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" checked>
+                    <label class="form-check-label">Notify on new materials</label>
+                </div>
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox">
+                    <label class="form-check-label">Download files locally</label>
+                </div>
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" checked>
+                    <label class="form-check-label">Sync lecture recordings</label>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function syncNow() {
+        const button = event.target;
+        button.innerHTML = '🔄 Syncing...';
+        button.disabled = true;
+
+        // Simulate sync
+        setTimeout(() => {
+            button.innerHTML = '✓ Synced!';
+            document.querySelector('.last-sync').textContent = 'Last synced: Just now';
+
+            setTimeout(() => {
+                button.innerHTML = '🔄 Sync Now';
+                button.disabled = false;
+            }, 2000);
+        }, 2000);
+    }
+</script>
+{% endblock %}
