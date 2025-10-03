@@ -29,3 +29,16 @@ config.py
 # OS specific files
 .DS_Store
 Thumbs.db
+.env
+.env.local
+.env.production
+*.log
+__pycache__/
+*.pyc
+.pytest_cache/
+venv/
+node_modules/
+dist/
+.vite/
+.DS_Store
+.tmp.driveupload/
